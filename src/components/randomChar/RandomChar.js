@@ -14,17 +14,37 @@ class RandomChar extends Component {
 	}
 	marvelService = new MarvelService()
 
-	constructor(props) {
-		super(props)
+	componentDidMount() {
 		this.updateChar()
+		this.startAutoUpdate()
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.timerId)
+	}
+
+	startAutoUpdate = () => {
+		this.timerId = setInterval(this.updateChar, 3000)
+	}
+
+	handleTryItClick = () => {
+		clearInterval(this.timerId)
+		this.updateChar()
+		this.startAutoUpdate()
 	}
 
 	onCharLoaded = (char) => {
-		this.setState({char, loading: false})
+		this.setState({
+			char,
+			loading: false
+		})
 	}
 
 	onError = () => {
-		this.setState({loading: false, error: true})
+		this.setState({
+			loading: false,
+			error: true
+		})
 	}
 
 	updateChar = () => {
@@ -55,7 +75,7 @@ class RandomChar extends Component {
 					<p className="randomchar__title">
 						Or choose another one
 					</p>
-					<button className="button button__main">
+					<button onClick={this.handleTryItClick} className="button button__main">
 						<div className="inner">try it</div>
 					</button>
 					<img src={mjolnir} alt="mjolnir" className="randomchar__decoration" />

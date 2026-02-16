@@ -29,14 +29,23 @@ class RandomChar extends Component {
 
 	handleTryItClick = () => {
 		clearInterval(this.timerId)
+		this.onCharLoading()
 		this.updateChar()
 		this.startAutoUpdate()
+	}
+
+	onCharLoading = () => {
+		this.setState({
+			loading: true,
+			error: false
+		})
 	}
 
 	onCharLoaded = (char) => {
 		this.setState({
 			char,
-			loading: false
+			loading: false,
+			error: false
 		})
 	}
 

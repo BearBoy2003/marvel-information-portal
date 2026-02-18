@@ -6,43 +6,66 @@ import MarvelService from '../../services/MarvelService'
 import './charList.scss'
 
 class CharList extends Component {
+	batchSize = 9
+
 	state = {
 		charList: [],
 		loading: true,
-		error: false
+		error: false,
+		newItemLoading: false,
+		offset: 0,
+		charEnded: false
 	}
 
 	marvelService = new MarvelService()
 
 	componentDidMount() {
-		this.onRequest()
+		this.onRequest(this.state.offset)
 	}
 
-	onRequest = () => {
+	onRequest = (offset) => {
+		this.onCharListLoading()
 		this.marvelService
-				.getAllCharacters()
+				.getAllCharacters(offset, this.batchSize)
 				.then(this.onCharListLoaded)
 				.catch(this.onError)
 	}
 
-	onCharListLoaded = (charList) => {
+	onCharListLoading = () => {
 		this.setState({
-			charList: charList.slice(0, 9),
-			loading: false
+			newItemLoading: true,
+			error: false
 		})
+	}
+
+	onCharListLoaded = (newCharList) => {
+		let ended = false
+
+		if (newCharList.length < this.batchSize) {
+			ended = true
+		}
+
+		this.setState(({offset, charList}) => ({
+			charList: [...charList, ...newCharList],
+			loading: false,
+			error: false,
+			newItemLoading: false,
+			offset: offset + this.batchSize,
+			charEnded: ended
+		}))
 	}
 
 	onError = () => {
 		this.setState({
 			loading: false,
-			error: true
+			error: true,
+			newItemLoading: false
 		})
 	}
 
 	renderItems = (arr) => {
 		const items = arr.map((item) => {
 			const {id, name, thumbnail} = item
-
 			return (
 				<li key={id} className="char__item" onClick={() => this.props.onCharSelected(id)}>
 					<img src={thumbnail} alt={name} />
@@ -55,17 +78,21 @@ class CharList extends Component {
 	}
 
 	render() {
-		const {charList, loading, error} = this.state
+		const {charList, loading, error, offset, newItemLoading, charEnded} = this.state
 		const errorMessage = error ? <ErrorMessage /> : null
 		const spinner = loading ? <Spinner /> : null
-		const items = !(loading || error) ? this.renderItems(charList) : null
+		const items = charList.length > 0 ? this.renderItems(charList) : null
 
 		return (
 			<div className="char__list">
 				{errorMessage}
 				{spinner}
 				{items}
-				<button className="button button__main button__long">
+				<button
+					className="button button__main button__long"
+					disabled={newItemLoading}
+					style={{'display': charEnded ? 'none' : 'block'}}
+					onClick={() => this.onRequest(offset)}>
 					<div className="inner">load more</div>
 				</button>
 			</div>

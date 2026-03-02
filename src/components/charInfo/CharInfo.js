@@ -1,8 +1,10 @@
 import { Component } from 'react'
+import PropTypes from 'prop-types'
 import MarvelService from '../../services/MarvelService'
 import Spinner from '../spinner/Spinner'
 import ErrorMessage from '../errorMessage/ErrorMessage'
 import Skeleton from '../skeleton/Skeleton'
+import imageNotAvailable from '../../resources/img/image_not_available.webp'
 
 import './charInfo.scss'
 
@@ -79,13 +81,19 @@ class CharInfo extends Component {
 	}
 }
 
+const onImageError = (event) => {
+	event.currentTarget.onerror = null
+	event.currentTarget.src = imageNotAvailable
+	event.currentTarget.style.objectFit = 'unset'
+}
+
 const View = ({char}) => {
 	const {name, description, thumbnail, homepage, wiki, comics} = char
 
 	return (
 		<>
 			<div className="char__basics">
-				<img src={thumbnail} alt={name} />
+				<img src={thumbnail} alt={name} onError={onImageError} />
 				<div>
 					<div className="char__info-name">{name}</div>
 					<div className="char__btns">
@@ -114,6 +122,10 @@ const View = ({char}) => {
 			</ul>
 		</>
 	)
+}
+
+CharInfo.propTypes = {
+	charId: PropTypes.number
 }
 
 export default CharInfo

@@ -1,7 +1,9 @@
 import { Component } from 'react'
+import PropTypes from 'prop-types'
 import Spinner from '../spinner/Spinner'
 import ErrorMessage from '../errorMessage/ErrorMessage'
 import MarvelService from '../../services/MarvelService'
+import imageNotAvailable from '../../resources/img/image_not_available.webp'
 
 import './charList.scss'
 
@@ -63,12 +65,18 @@ class CharList extends Component {
 		})
 	}
 
+	onImageError = (event) => {
+		event.currentTarget.onerror = null
+		event.currentTarget.src = imageNotAvailable
+		event.currentTarget.style.objectFit = 'unset'
+	}
+
 	renderItems = (arr) => {
 		const items = arr.map((item) => {
 			const {id, name, thumbnail} = item
 			return (
 				<li key={id} className="char__item" onClick={() => this.props.onCharSelected(id)}>
-					<img src={thumbnail} alt={name} />
+					<img src={thumbnail} alt={name} onError={this.onImageError} />
 					<div className="char__name">{name}</div>
 				</li>
 			)
@@ -92,12 +100,17 @@ class CharList extends Component {
 					className="button button__main button__long"
 					disabled={newItemLoading}
 					style={{'display': charEnded ? 'none' : 'block'}}
-					onClick={() => this.onRequest(offset)}>
+					onClick={() => this.onRequest(offset)}
+				>
 					<div className="inner">load more</div>
 				</button>
 			</div>
 		)
 	}
+}
+
+CharList.propTypes = {
+	onCharSelected: PropTypes.func.isRequired
 }
 
 export default CharList

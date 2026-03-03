@@ -20,7 +20,7 @@ class CharList extends Component {
 	}
 
 	marvelService = new MarvelService()
-
+	
 	componentDidMount() {
 		this.onRequest(this.state.offset)
 	}
@@ -71,11 +71,42 @@ class CharList extends Component {
 		event.currentTarget.style.objectFit = 'unset'
 	}
 
+	itemRefs = []
+
+	setItemRef = (element, index) => {
+		this.itemRefs[index] = element
+	}
+
+	focusOnItem = (index) => {
+		this.itemRefs.forEach((item) => item && item.classList.remove('char__item_selected'))
+		this.itemRefs[index]?.classList.add('char__item_selected')
+		this.itemRefs[index]?.focus()
+	}
+
+	handleItemSelect = (id, index) => {
+		this.props.onCharSelected(id)
+		this.focusOnItem(index)
+	}
+
+	handleItemKeyDown = (event, id, index) => {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault()
+			this.handleItemSelect(id, index)
+		}
+	}
+
 	renderItems = (arr) => {
-		const items = arr.map((item) => {
+		const items = arr.map((item, index) => {
 			const {id, name, thumbnail} = item
 			return (
-				<li key={id} className="char__item" onClick={() => this.props.onCharSelected(id)}>
+				<li
+					key={id}
+					className="char__item"
+					tabIndex={0}
+					ref={(element) => this.setItemRef(element, index)}
+					onClick={() => this.handleItemSelect(id, index)}
+					onKeyDown={(event) => this.handleItemKeyDown(event, id, index)}
+				>
 					<img src={thumbnail} alt={name} onError={this.onImageError} />
 					<div className="char__name">{name}</div>
 				</li>
@@ -99,7 +130,7 @@ class CharList extends Component {
 				<button
 					className="button button__main button__long"
 					disabled={newItemLoading}
-					style={{'display': charEnded ? 'none' : 'block'}}
+					style={{display: charEnded ? 'none' : 'block'}}
 					onClick={() => this.onRequest(offset)}
 				>
 					<div className="inner">load more</div>
